@@ -1,6 +1,10 @@
 spring:
   application:
     name: rockets
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/rockets}
+    username: ${DB_USERNAME:rockets}
+    password: ${DB_PASSWORD:rockets}
 
 server:
   port: 8088

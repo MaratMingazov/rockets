@@ -1,6 +1,7 @@
 package com.lunar.rockets.api
 
 import com.lunar.rockets.codec.InvalidMessageException
+import com.lunar.rockets.service.RocketNotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ProblemDetail
@@ -17,4 +18,12 @@ class ApiExceptionHandler {
         log.warn("Rejected invalid message: {}", e.message)
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.message ?: "Invalid message")
     }
+
+    @ExceptionHandler(InvalidRequestParameterException::class)
+    fun handleInvalidParameter(e: InvalidRequestParameterException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.message ?: "Invalid request parameter")
+
+    @ExceptionHandler(RocketNotFoundException::class)
+    fun handleNotFound(e: RocketNotFoundException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.message ?: "Rocket not found")
 }

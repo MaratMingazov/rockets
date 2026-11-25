@@ -1,6 +1,8 @@
 package com.lunar.rockets.persistence
 
 import com.lunar.rockets.domain.Rocket
+import com.lunar.rockets.domain.RocketQuery
+import com.lunar.rockets.domain.RocketSortField
 import com.lunar.rockets.domain.RocketStatus
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.simple.JdbcClient
@@ -46,6 +48,43 @@ class RocketRepository(private val jdbc: JdbcClient) {
             .query(ROCKET_MAPPER)
             .optional()
             .orElse(null)
+
+    /**
+     * Rockets visible in the API (not `PENDING`), filtered and sorted by [query], with `channel` as a tie-breaker.
+     *
+     * Only fixed SQL fragments are concatenated; filter values are bound as parameters
+     * and the sort column comes from [sortColumn], never from client input.
+     */
+    fun findAllVisible(query: RocketQuery): List<Rocket> {
+        val conditions = mutableListOf("status <> :pending")
+        val params = mutableMapOf<String, Any>("pending" to RocketStatus.PENDING.name)
+        query.status?.let {
+            conditions += "status = :status"
+            params["status"] = it.name
+        }
+        query.minSpeed?.let {
+            conditions += "speed >= :minSpeed"
+            params["minSpeed"] = it
+        }
+        query.maxSpeed?.let {
+            conditions += "speed <= :maxSpeed"
+            params["maxSpeed"] = it
+        }
+        val sql = """
+            SELECT * FROM rockets
+            WHERE ${conditions.joinToString(" AND ")}
+            ORDER BY ${sortColumn(query.sort)} ${query.order.name}, channel
+        """
+        return jdbc.sql(sql).params(params).query(ROCKET_MAPPER).list()
+    }
+
+    private fun sortColumn(field: RocketSortField): String = when (field) {
+        RocketSortField.SPEED -> "speed"
+        RocketSortField.TYPE -> "type"
+        RocketSortField.MISSION -> "mission"
+        RocketSortField.STATUS -> "status"
+        RocketSortField.LAUNCHED_AT -> "launched_at"
+    }
 
     /**
      * Writes the full state of [rocket] (not a delta), i.e. the second half of read → compute → write.

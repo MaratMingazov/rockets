@@ -5,9 +5,24 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/rockets}
     username: ${DB_USERNAME:rockets}
     password: ${DB_PASSWORD:rockets}
+    hikari:
+      connection-timeout: 3000
   mvc:
     problemdetails:
       enabled: true
 
 server:
   port: 8088
+  tomcat:
+    mbeanregistry:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true

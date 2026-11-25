@@ -38,6 +38,16 @@ class RocketRepository(private val jdbc: JdbcClient) {
     }
 
     /**
+     * Plain read without a lock; returns rockets in any status, including `PENDING`.
+     */
+    fun findByChannel(channel: UUID): Rocket? =
+        jdbc.sql("SELECT * FROM rockets WHERE channel = :channel")
+            .param("channel", channel)
+            .query(ROCKET_MAPPER)
+            .optional()
+            .orElse(null)
+
+    /**
      * Writes the full state of [rocket] (not a delta), i.e. the second half of read → compute → write.
      * Only correct in the same transaction that locked the row via [lockOrCreate], hence [Propagation.MANDATORY].
      */

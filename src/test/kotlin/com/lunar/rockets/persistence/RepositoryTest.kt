@@ -62,6 +62,24 @@ class RepositoryTest {
     }
 
     @Test
+    fun `findByChannel returns null for an unknown rocket and the stored one otherwise`() {
+        assertEquals(null, rockets.findByChannel(channel))
+
+        val pending = rockets.lockOrCreate(channel)
+        assertEquals(pending, rockets.findByChannel(channel))
+
+        val launched = pending.applyMessage(msg(1, RocketEvent.Launched("Falcon-9", 500, "ARTEMIS")))
+        rockets.update(launched)
+        assertEquals(launched, rockets.findByChannel(channel))
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    fun `findByChannel works without a transaction`() {
+        assertEquals(null, rockets.findByChannel(channel))
+    }
+
+    @Test
     fun `lockOrCreate returns the existing rocket instead of resetting it`() {
         val launched = rockets.lockOrCreate(channel).applyMessage(msg(1, RocketEvent.Launched("Falcon-9", 500, "ARTEMIS")))
         rockets.update(launched)

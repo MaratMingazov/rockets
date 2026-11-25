@@ -34,6 +34,9 @@ class RocketEventCodec(private val objectMapper: ObjectMapper) {
     fun parse(messageType: String, payload: JsonNode): RocketEvent {
         val eventClass = EVENT_CLASSES[messageType]
             ?: throw InvalidMessageException("Unknown messageType '$messageType'")
+        if (!payload.isObject) {
+            throw InvalidMessageException("'message' of '$messageType' must be a JSON object, was ${payload.nodeType}")
+        }
         val event = try {
             objectMapper.treeToValue(payload, eventClass)
         } catch (e: JacksonException) {

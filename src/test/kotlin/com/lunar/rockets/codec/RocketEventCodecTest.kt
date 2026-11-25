@@ -85,7 +85,12 @@ class RocketEventCodecTest {
 
     @Test
     fun `rejects payload that is not an object`() {
-        assertInvalid("RocketSpeedIncreased", """[1,2,3]""", "Invalid 'RocketSpeedIncreased' message")
+        assertInvalid("RocketSpeedIncreased", """[1,2,3]""", "must be a JSON object, was ARRAY")
+    }
+
+    @Test
+    fun `rejects null payload`() {
+        assertInvalid("RocketSpeedIncreased", """null""", "must be a JSON object, was NULL")
     }
 
     @Test

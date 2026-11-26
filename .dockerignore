@@ -1,0 +1,15 @@
+.git
+.gitignore
+.gradle
+.idea
+.kotlin
+.DS_Store
+build
+out
+task
+monitoring
+NOTES.md
+README.md
+Dockerfile
+.dockerignore
+docker-compose.yml

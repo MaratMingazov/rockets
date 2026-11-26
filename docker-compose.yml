@@ -15,6 +15,17 @@ services:
       timeout: 3s
       retries: 15
 
+  app:
+    build: .
+    image: rockets:local
+    ports:
+      - "8088:8088"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/rockets
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   prometheus:
     image: prom/prometheus:v3.16.0
     profiles: [monitoring]
@@ -24,6 +35,21 @@ services:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+  grafana:
+    image: grafana/grafana:13.3.2
+    profiles: [monitoring]
+    ports:
+      - "3000:3000"
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
 
 volumes:
   postgres-data:

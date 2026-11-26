@@ -1,6 +1,7 @@
 ### Project ###
 # Test program binaries from the challenge ZIP (not ours, not committed)
 task/
+NOTES.md
 
 ### Gradle ###
 .gradle

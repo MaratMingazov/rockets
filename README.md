@@ -3,6 +3,8 @@
 A Kotlin / Spring Boot service that consumes rocket state-change messages — which arrive **out of order** and
 **at least once** — and exposes the current state of every rocket through a REST API.
 
+How work on this project is organised, including how AI coding assistants are used: [CLAUDE.md](CLAUDE.md).
+
 ## Quick start
 
 **Prerequisites:** Docker with Compose v2. That is all to run the service.

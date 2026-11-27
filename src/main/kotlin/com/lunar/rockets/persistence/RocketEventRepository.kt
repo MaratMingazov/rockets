@@ -20,7 +20,7 @@ class RocketEventRepository(
     /**
      * Stores [message] unless a message with the same `(channel, messageNumber)` is already stored.
      *
-     * Must run under the rocket's lock (see "Why the lock" in README), hence [Propagation.MANDATORY].
+     * Must run under the rocket's lock (see "Architecture" in README), hence [Propagation.MANDATORY].
      *
      * @return `true` if inserted, `false` if it was a duplicate
      */

@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 /**
  * Stores each message and applies messages to the rocket state strictly in `messageNumber` order,
  * ignoring duplicates. One transaction per message, serialised per rocket by a row lock.
- * See "Version 1" and "Why the lock" in README.
+ * See "Architecture" and "Processing a message" in README.
  */
 @Service
 class RocketMessageService(

@@ -20,7 +20,7 @@ data class Rocket(
     /**
      * Returns the state after applying [message], which must be the next one in order
      * (`lastAppliedMessageNumber + 1`). The cursor and [updatedAt] always advance, even if the event
-     * changes nothing else. See "Applying rules" in README for the transition table.
+     * changes nothing else. See "Rocket state" in README for the transition diagram.
      */
     fun applyMessage(message: ReceivedMessage): Rocket {
         require(message.channel == channel) {

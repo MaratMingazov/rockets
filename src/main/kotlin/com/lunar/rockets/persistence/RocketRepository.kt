@@ -16,7 +16,7 @@ class RocketRepository(private val jdbc: JdbcClient) {
 
     /**
      * Creates the rocket row as `PENDING` if it does not exist yet, then locks it (`FOR UPDATE`) until the end
-     * of the current transaction. See "Why the lock" in README.
+     * of the current transaction. See "Architecture" in README.
      *
      * Requires an active transaction ([Propagation.MANDATORY]): without one, each statement would auto-commit
      * and the lock would be released immediately — silently. Throws `IllegalTransactionStateException` instead.

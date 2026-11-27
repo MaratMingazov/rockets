@@ -20,7 +20,7 @@ import kotlin.test.assertEquals
 /**
  * Many threads deliver shuffled messages with duplicates at the same time, like the test program does
  * with `--concurrency-level`. Whatever the interleaving, the result must equal in-order delivery.
- * This is the test that verifies the per-rocket lock (see "Why the lock" in README).
+ * This is the test that verifies the per-rocket lock (see "Architecture" in README).
  */
 @SpringBootTest
 @Import(TestcontainersConfiguration::class)

@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActionsDsl
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import java.time.Instant
 import java.util.UUID
@@ -35,8 +36,12 @@ class RocketsControllerTest {
     class FakeRocketQueryService : RocketQueryService {
         val rockets = mutableMapOf<UUID, Rocket>()
         var lastQuery: RocketQuery? = null
+        var failure: RuntimeException? = null
 
-        override fun get(channel: UUID): Rocket = rockets[channel] ?: throw RocketNotFoundException(channel)
+        override fun get(channel: UUID): Rocket {
+            failure?.let { throw it }
+            return rockets[channel] ?: throw RocketNotFoundException(channel)
+        }
 
         override fun list(query: RocketQuery): List<Rocket> {
             lastQuery = query
@@ -68,6 +73,7 @@ class RocketsControllerTest {
     fun reset() {
         service.rockets.clear()
         service.lastQuery = null
+        service.failure = null
     }
 
     private fun ResultActionsDsl.andExpectProblem(status: Int, detail: String? = null) = andExpect {
@@ -139,6 +145,7 @@ class RocketsControllerTest {
     fun `rejects unknown sort field`() {
         mockMvc.get("/rockets?sort=name")
             .andExpectProblem(400, "Unknown sort 'name', allowed: speed, type, mission, status, launchedAt")
+            .andExpect { jsonPath("$.title") { value("Bad Request") } }
     }
 
     @Test
@@ -155,5 +162,24 @@ class RocketsControllerTest {
     @Test
     fun `rejects a non-numeric speed filter`() {
         mockMvc.get("/rockets?minSpeed=fast").andExpectProblem(400)
+    }
+
+    @Test
+    fun `turns an unexpected error into 500 without exposing its details`() {
+        service.failure = IllegalStateException("connection to db-internal-17 refused: SELECT * FROM rockets")
+
+        mockMvc.get("/rockets/$channel")
+            .andExpectProblem(500, "Internal error")
+            .andExpect { content { string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("db-internal"))) } }
+    }
+
+    @Test
+    fun `an unknown path is still 404, not 500`() {
+        mockMvc.get("/no-such-endpoint").andExpectProblem(404)
+    }
+
+    @Test
+    fun `a wrong HTTP method is still 405, not 500`() {
+        mockMvc.delete("/rockets").andExpectProblem(405)
     }
 }

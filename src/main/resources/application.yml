@@ -7,9 +7,6 @@ spring:
     password: ${DB_PASSWORD:rockets}
     hikari:
       connection-timeout: 3000
-  mvc:
-    problemdetails:
-      enabled: true
 
 server:
   port: 8088
